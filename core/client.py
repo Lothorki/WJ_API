@@ -83,6 +83,7 @@ class Http:
 		self.resp = None
 		self.files = {}
 		self.data = None
+		self.tid_path = None
 
 	def set_header(self, key, value):
 		self.headers[key] = value
@@ -268,7 +269,8 @@ class Http:
 
 	@property
 	def tid(self):
-		res = self.get_response_json_value('$.tid')
+		# res = self.get_response_json_value('$.tid')
+		res = self.get_response_json_value(self.tid_path)
 		if res is not None:
 			return res
 		else:
@@ -366,6 +368,37 @@ class Http:
 				act=act, exp=exp
 			)
 		return '响应签名验证成功'
+
+	@add_log
+	def check_node_num(self, num):
+		try:
+			res = json.loads(self.response_text)
+		except:
+			return '接口响应不是正确的json格式'
+		if isinstance(res, dict):
+			a = len(res)
+			assert len(res) <= int(num), '一级节点数量校验失败，实际是【{a}】，预期是不少于【{num}】'.format(
+				a=a, num=num
+			)
+			return '一级节点数量验证成功'
+
+
+
+	@add_log
+	def check_subnode_num(self, node, num):
+		try:
+			res = self.get_response_json_value(node)
+		except:
+			return '接口响应不是正确的json格式'
+		if isinstance(res, dict):
+			a = len(res)
+			assert len(res) <= int(num), '二级节点数量校验失败，实际是【{a}】，预期是不少于【{num}】'.format(
+				a=a, num=num
+			)
+			return '二级节点{node}数量验证成功'.format(node=node)
+		else:
+			r = '{node}不包含子节点'.format(node=node)
+			raise Exception(r)
 
 
 	@add_log
