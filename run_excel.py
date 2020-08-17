@@ -49,10 +49,13 @@ for n in names:
 		use_data = case.get('数据引用')
 		in_signs = case.get('入参验签字段')
 		out_signs = case.get('响应验签字段')
+		tid_path = case.get('tid_path')
 		status = case.get('响应状态码')
 		res_time = case.get('响应时间')
 		resCode = case.get('resCode')
 		check1 = case.get('节点')
+		node1 = case.get('一级节点数量')
+		node2 = case.get('二级节点数量')
 		zuh_charge = case.get('zuh计费')
 		zdh_charges = case.get('zdh计费（ds_name/ds_type/charge）')
 		zdh_counts = case.get('zdh记录条数')
@@ -141,6 +144,10 @@ for n in names:
 					client.set_url_data(params)
 
 			client.send()
+			if tid_path:
+				client.tid_path = '$.' + tid_path
+			else:
+				client.tid_path = '$.tid'
 			if depends:
 				depends_list = depends.split('\n')
 				for d in depends_list:
@@ -161,6 +168,10 @@ for n in names:
 				client.check_status_code(200)
 			if resCode:
 				client.check_response_json_value('resCode', resCode)
+			if node1:
+				client.check_node_num(int(node1))
+			if node2:
+				client.check_subnode_num(node2.split(',')[0], node2.split(',')[1])
 			if check_sign and out_signs:
 				client.check_res_sign(res_exp_sign)
 			if res_time:
